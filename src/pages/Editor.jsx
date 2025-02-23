@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Navbar from '../Components/Navbar';  // Adjust if your folder structure is different
+import Navbar from "../Components/Navbar";
 import CodeEditor from "../components/CodeEditor";
 
 const JUDGE0_API_URL = "http://localhost:2358"; // Local Judge0 API
