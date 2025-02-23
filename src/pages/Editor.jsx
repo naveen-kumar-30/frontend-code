@@ -14,7 +14,7 @@ const Editor = () => {
 
   useEffect(() => {
     // Establish WebSocket connection
-    const socketConnection = connectWebSocket("ws://localhost:5000", handleMessage);
+    const socketConnection = connectWebSocket("ws:https://code-editor-deploy-1du0.onrender.com", handleMessage);
     setSocket(socketConnection);
 
     // Cleanup WebSocket connection when component unmounts
