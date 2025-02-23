@@ -1,8 +1,6 @@
-import React, { useState } from "react";
-import Navbar from "../Components/Navbar";
-import CodeEditor from "../components/CodeEditor";
-
-const JUDGE0_API_URL = "http://localhost:2358"; // Local Judge0 API
+import React, { useState, useEffect } from "react";
+// import your WebSocket utility here
+import { connectWebSocket, sendMessage, closeWebSocket } from "./websocket";  // Adjust the path
 
 const Editor = () => {
   const [code, setCode] = useState("// Write your code here...");
@@ -11,7 +9,30 @@ const Editor = () => {
   const [theme, setTheme] = useState("vs-dark");
   const [stdin, setStdin] = useState("");
   const [users, setUsers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
+  const [socket, setSocket] = useState(null); // WebSocket state
+
+  useEffect(() => {
+    // Establish WebSocket connection
+    const socketConnection = connectWebSocket("ws://localhost:5000", handleMessage);
+    setSocket(socketConnection);
+
+    // Cleanup WebSocket connection when component unmounts
+    return () => {
+      closeWebSocket();
+    };
+  }, []);
+
+  // Handle incoming WebSocket messages
+  const handleMessage = (message) => {
+    if (message.type === "user-joined") {
+      setUsers((prevUsers) => [...prevUsers, message.user]);
+    } else if (message.type === "user-left") {
+      setUsers((prevUsers) => prevUsers.filter(user => user !== message.user));
+    } else if (message.type === "code-update") {
+      setCode(message.code);  // Sync code changes in real-time
+    }
+  };
 
   const handleLanguageChange = (newLanguage) => {
     if (language !== newLanguage) {
@@ -43,7 +64,6 @@ const Editor = () => {
 
   const isError = output && output.startsWith("❌");
 
-  // Function to handle code execution
   const runCode = async (code, language, stdin) => {
     try {
       const response = await fetch(`${JUDGE0_API_URL}/submissions?base64_encoded=true&wait=true`, {
